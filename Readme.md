@@ -35,18 +35,13 @@ Install the dependencies
 
 You need the cross-compiler gcc for the softcore.
 
-From https://github.com/enjoy-digital/litex
+    cd tools
+    wget https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.08/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14.tar.gz
+    tar xvf riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14.tar.gz
 
-    mkdir -p dependencies/litex
-    cd dependencies/litex
-    wget https://raw.githubusercontent.com/enjoy-digital/litex/master/litex_setup.py
-    chmod +x litex_setup.py
-    ./litex_setup.py --gcc riscv
-    rm *.tar.gz
+Adding compiler in the path
 
-Adding compiler in the path (replace * with the correct name)
-
-    export GCC_RISCV=$PWD/riscv64-*/bin/
+    export GCC_RISCV=$PWD/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin/
     echo "export PATH=\"\$PATH:$GCC_RISCV\"" >>~/.bashrc
 
 
