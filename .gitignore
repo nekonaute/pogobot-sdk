@@ -4,3 +4,5 @@
 *.d
 *.elf
 *.bin
+dependencies
+tools/riscv*

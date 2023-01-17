@@ -62,7 +62,7 @@ From https://github.com/enjoy-digital/litex
     chmod +x litex_setup.py
     ./litex_setup.py init
 
-    cat ../../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
+    cat ../../tools/litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
 
     sudo ./litex_setup.py install
 
