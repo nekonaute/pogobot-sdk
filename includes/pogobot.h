@@ -191,8 +191,6 @@ typedef enum
  * - uint8_t _sender_ir_index     - IR id direction of the sender robot  
  * - uint16_t receiver_id         - id of the recipient robot
  * - uint8_t _receiver_ir_index   - IR id direction that received the message
- * - uint8_t _sequence_number     - (not used for now)
- * - uint8_t user_tag             - allows the user to give a tag to a message
  * - uint16_t payload_length      - size of the payload
  *
  */
@@ -205,8 +203,6 @@ typedef struct message_header_t
     uint8_t _sender_ir_index;
     uint16_t receiver_id;
     uint8_t _receiver_ir_index;
-    uint8_t _sequence_number;
-    uint8_t user_tag;
     uint16_t payload_length;
 } message_header_t;
 
@@ -459,15 +455,15 @@ void pogobot_led_setColors( const uint8_t r, const uint8_t g, const uint8_t b, u
 
 /**
  * ### Photosensor id definition
- * - 0 is the rear sensor
- * - 1 is the right sensor
- * - 2 is the left sensor
+ * - 0 is the back sensor
+ * - 1 is the front-left sensor
+ * - 2 is the front-right sensor
  */
 
 typedef enum
 {
-    p_FR = 1,
-    p_FL = 2,
+    p_FL = 1,
+    p_FR = 2,
     p_B = 0
 } photosensor_id;
 
@@ -618,6 +614,30 @@ uint32_t pogobot_motor_dir_status( void );
  *
  */
 void pogobot_motor_dir_set( motor_id motor, uint16_t value );
+
+/** (pogobot_motor_get_power)
+ * recover the value of the motor power memorized.
+ * 
+ * # Parameters
+ * - 'p_motors' - is a pointer to a table [R, L, B] 
+ *
+ * # Return
+ * - read status
+ *
+ */
+uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+
+/** (pogobot_motor_set_power)
+ * write the value of the motor power in memory.
+ * 
+ * # Parameters
+ * - 'p_motors' - is a pointer to a table [R, L, B] 
+ *
+ * # Return
+ * - read status
+ *
+ */
+uint8_t pogobot_motor_get_power( uint16_t *p_motors );
 
 /**
  * ## Helper API
