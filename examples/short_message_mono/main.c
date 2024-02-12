@@ -58,11 +58,11 @@ int main(void) {
         {
           printf( "TRANS one dir: %d, %d ", ir_emitter, sizeof(message) );
           printf( "%s\n", message);
-          pogobot_infrared_sendShortMessageOneDirection( ir_emitter, message, sizeof(message) );
+          pogobot_infrared_sendShortMessage_uni( ir_emitter, message, sizeof(message) );
         
-          printf( "TRANS all: %d ", sizeof(message) );
-          printf( "%s\n", message);
-          pogobot_infrared_sendShortMessageAllDirection( messageAll, sizeof(messageAll) );
+          printf( "TRANS all: %d ", sizeof(messageAll) );
+          printf( "%s\n", messageAll);
+          pogobot_infrared_sendShortMessage_omni( messageAll, sizeof(messageAll) );
           counter = counter + 1;
         }
 
@@ -74,8 +74,8 @@ int main(void) {
                 message_t mr;
                 pogobot_infrared_recover_next_message( &mr );
 
-                printf( "RECV: receiver %d, on ir %d, sender %d on ir %d ",
-                        mr.header.receiver_id, mr.header._receiver_ir_index,
+                printf( "RECV: receiver on ir %d, sender %d on ir %d ",
+                        mr.header._receiver_ir_index,
                         mr.header._sender_id, mr.header._sender_ir_index );
                 printf( "RECV: len %d [%s]\n", mr.header.payload_length,
                         mr.payload );
