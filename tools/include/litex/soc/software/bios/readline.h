@@ -6,7 +6,7 @@
 
 #define CMD_LINE_BUFFER_SIZE	64
 
-#define PROMPT "\e[92;1mPogo\e[0m> "
+#define PROMPT "\e[92;1mlitex\e[0m> "
 
 #define ESC	27
 
