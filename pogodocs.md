@@ -1073,7 +1073,7 @@ x, y, z    - x, y and z axis coordinates measured by the magnetometer (needs cal
 timeout_ms - measurement timeout in ms.
 
 #### Returns :
-- 1 if successfull else 0
+- 0 if successfull else 1
 
 <a name="line-1111"></a><a name="magn_init"></a>
 ### :arrow_right: magn_init
