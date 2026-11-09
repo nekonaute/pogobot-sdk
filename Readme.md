@@ -41,8 +41,8 @@ through the updated headers.
 
 Applications link their own copy of pogolib. Rebuild and re-upload an
 application with this SDK to include the fixes; updating Pogobios alone does
-not update that application code. This library refresh retains existing API signatures and the 64 KiB program
-linker allowance. The coordinated IR upload tools are described below.
+not update that application code. The v2.7.1 raw flash-page signature and linker-capacity changes are described
+below. The other existing application API signatures remain unchanged.
 
 The prebuilt archive contains native fallback code as well as LTO information.
 The ordinary example Makefiles work with the tested GCC 10.1.0 toolchain; LTO
@@ -67,6 +67,21 @@ robot. Q cancels transmission. Direct cable uploads retain their protocol.
 `POGOBOT_IR_COPIES=2 make connect TTY=/dev/ttyUSBX` requests another full pass.
 The `firmware_integrity` example checks its installed image and can add an
 adjustable flash-only payload for larger upload tests.
+
+V3 flash and program limits
+--------------------------
+
+`read_page_flash` and `write_page_flash` now take `uint16_t` page IDs.
+Rebuild applications and wrappers against the matched headers and archive.
+Valid pages are 0..5887, each 256 bytes, at physical offsets
+`0x90000..0x1FFFFF`. Public `POGOBOT_USER_FLASH_*` constants expose these bounds.
+The flash example tests pages 0, 255, 256 and 5887 and erases the full region;
+it destroys existing user data.
+
+Generated linker/memory definitions allow 96 KiB programs. Code, data and
+stack must still fit 128 KiB SRAM. This linker limit is separate from the
+128 KiB physical firmware upload slot and the 1,472 KiB user-data region.
+These capacities assume v3 hardware with 2 MiB flash.
 
 Requirements
 ============
