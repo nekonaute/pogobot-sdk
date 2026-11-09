@@ -83,6 +83,39 @@ stack must still fit 128 KiB SRAM. This linker limit is separate from the
 128 KiB physical firmware upload slot and the 1,472 KiB user-data region.
 These capacities assume v3 hardware with 2 MiB flash.
 
+PFFS files and saved controllers
+-------------------------------
+
+PFFS v4 file and append-log APIs are included in `libpogobot.a` and exposed
+through `pogobot.h` or `pffs/flash_file.h` and `pffs/flash_log.h`.
+The maintained core is distributed under `src/pffs` for native consumers;
+hardware applications link the archive. See [the core API notes](src/pffs/README.md).
+
+PFFS shares the raw flash region: 64 KiB is reserved for catalogs and
+1,408 KiB for contiguous file extents. Raw page writes/erases can destroy
+files. File operations require serialized access. Library creation retains
+its documented autoformat policy for unformatted/corrupt catalogs; call
+`pogo_flash_file_check()` first when preserving damaged data. Replacement and
+compaction are not power-loss atomic.
+
+The host tool `tools/pffs_transfer.py` uploads/downloads files over UART;
+use `--help` for options. Firmware commands include explicit `format YES`,
+file management, and verified `load <id|name>` installation of a raw
+controller followed by `run`. `load_run <name>` and remote `rc_load_run` select
+and start an exact named controller; failure shows red without starting an
+older image. These commands require the matching BIOS.
+
+`ir_send_file` on robots and `rc_send_file` on remotes broadcast named ordinary
+files using parity and repeated passes. Receivers choose local IDs and verify
+contents before publication. `--replace` preserves an existing ID and requires
+matching format/page allocation; an interrupted replacement can destroy its
+old contents. A pending reception locks file access until completion or local
+`ir_file_abort`. There are no receiver acknowledgements or automatic relays.
+
+Defragmentation remains in the library for maintenance applications such as
+`pogo-utils/examples/flash_file`. It is omitted from the BIOS console. All PFFS
+allocation/mutation must be coordinated with other flash users.
+
 Requirements
 ============
 
