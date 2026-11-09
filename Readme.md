@@ -29,6 +29,27 @@ This SDK allows you to compile and upload code on the robot.
 
 Please visit : https://github.com/nekonaute/pogobot-sdk or https://github.com/nekonaute/pogobot
 
+Library refresh for the 2.7 firmware
+------------------------------------
+
+This SDK includes the library fixes from Pogobot's LTO/general-fixes change.
+IR constructors reject oversized payloads before copying, transmitters wait
+for FIFO space for every byte, and receivers validate lengths before processing
+commands. Full 256-byte SPI security-register writes and signed timer
+conversions are corrected. Receive-drop/malformed counters are available
+through the updated headers.
+
+Applications link their own copy of pogolib. Rebuild and re-upload an
+application with this SDK to include the fixes; updating Pogobios alone does
+not update that application code. Existing API signatures, the original
+firmware-upload protocol and the 64 KiB program linker allowance are retained.
+
+The prebuilt archive contains native fallback code as well as LTO information.
+The ordinary example Makefiles work with the tested GCC 10.1.0 toolchain; LTO
+is not a new requirement for application source. Compiler/source provenance
+and the archive checksum are recorded in [SDK_BUILD.md](SDK_BUILD.md).
+Hardware timing and behavior remain to be checked on robots.
+
 Requirements
 ============
 
