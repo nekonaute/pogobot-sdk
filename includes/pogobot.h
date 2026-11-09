@@ -488,6 +488,12 @@ uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t mess
  */
 void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index );
 
+/** Number of complete IR messages discarded because the receive queue was full. */
+uint32_t pogobot_infrared_get_queue_drop_count( void );
+
+/** Number of CRC-valid IR messages rejected because their lengths were invalid. */
+uint32_t pogobot_infrared_get_malformed_count( void );
+
 /** (pogobot_infrared_reset_receiver_error_counter)
  * Reset all reveiver error counter
  *
@@ -1122,9 +1128,17 @@ int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
  * - None
  * 
  * # Return
- * - 1 if successfully detected the magnetometer, else 0
+ * - 0 if successfully detected the magnetometer, else 1
 **/
 uint8_t magn_init(void);
 
+// *****
+// Changes the magnetometer output data rate (has an effect on the low pass filter bandwidth)
+// Args :
+// odr - output data rate (either 10, 20, 50 or 100 Hz)
+// Returns :
+// - 1 if successfull else 0
+// *****
+uint8_t magn_select_odr(uint8_t odr);
 
 #endif /* __POGOBOT_H__ */
