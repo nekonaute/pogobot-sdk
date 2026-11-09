@@ -41,14 +41,32 @@ through the updated headers.
 
 Applications link their own copy of pogolib. Rebuild and re-upload an
 application with this SDK to include the fixes; updating Pogobios alone does
-not update that application code. Existing API signatures, the original
-firmware-upload protocol and the 64 KiB program linker allowance are retained.
+not update that application code. This library refresh retains existing API signatures and the 64 KiB program
+linker allowance. The coordinated IR upload tools are described below.
 
 The prebuilt archive contains native fallback code as well as LTO information.
 The ordinary example Makefiles work with the tested GCC 10.1.0 toolchain; LTO
 is not a new requirement for application source. Compiler/source provenance
 and the archive checksum are recorded in [SDK_BUILD.md](SDK_BUILD.md).
 Hardware timing and behavior remain to be checked on robots.
+
+Versioned IR upload tools
+-------------------------
+
+Use the existing `make connect TTY=/dev/ttyUSBX` command from an example,
+then `run` and `rc_flash_robot` at the remote. The terminal recognizes the
+updated remote automatically. Keep `tools/litex_term.py` and
+`tools/ir_upload_v2.py` together; no Makefile flag is required.
+
+Matching remote and robot firmware is required. Uploads use numbered 64-byte
+chunks, an exact-image CRC and 16+4 erasure parity. Repeating `rc_flash_robot`
+for the same image can reuse accepted chunks while receivers remain powered.
+Progress reports acknowledgements by the remote, not completion on every
+robot. Q cancels transmission. Direct cable uploads retain their protocol.
+
+`POGOBOT_IR_COPIES=2 make connect TTY=/dev/ttyUSBX` requests another full pass.
+The `firmware_integrity` example checks its installed image and can add an
+adjustable flash-only payload for larger upload tests.
 
 Requirements
 ============
