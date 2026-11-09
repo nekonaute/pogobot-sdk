@@ -488,6 +488,12 @@ uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t mess
  */
 void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index );
 
+/** Number of complete IR messages discarded because the receive queue was full. */
+uint32_t pogobot_infrared_get_queue_drop_count( void );
+
+/** Number of CRC-valid IR messages rejected because their lengths were invalid. */
+uint32_t pogobot_infrared_get_malformed_count( void );
+
 /** (pogobot_infrared_reset_receiver_error_counter)
  * Reset all reveiver error counter
  *
@@ -1023,12 +1029,16 @@ void pogobot_timer_offset_origin_microseconds( time_reference_t *timer, int32_t 
  *
  * Those functions allow the user to store data in the flash memory.
  *
- * The section is 64kB long and is writable by pages of 256 bytes.
- * It starts at 0x290000 and is 0x10000 long.
+ * On v3 robots, the user section occupies physical flash offsets 0x90000
+ * through 0x1fffff: 5888 pages of 256 bytes (1472 KiB). Earlier flash holds
+ * gateware, firmware, and the upload validity marker.
 */
+#define POGOBOT_USER_FLASH_START_OFFSET 0x90000u
+#define POGOBOT_USER_FLASH_PAGE_SIZE 256u
+#define POGOBOT_USER_FLASH_PAGE_COUNT 5888u
 
 /** (erase_write_section_flash)
- * Erase the whole user writable section (64 kB).
+ * Erase the whole user writable section (1472 KiB, 23 64 KiB sectors).
  * It fills the section with 0xFF values.
  *
  * # Parameters
@@ -1043,25 +1053,25 @@ void erase_write_section_flash(void);
  * Writes 256 bytes on a page in the user writable section.
  *
  * # Parameters
- * - 'page' - page number
+ * - 'page' - page number, from 0 to 5887; other values are rejected.
  * - 'data' - pointer to an array containing data to write in the page.
  *
  * # Return 
  * - none
 **/
-void write_page_flash(uint8_t page, const void *data);
+void write_page_flash(uint16_t page, const void *data);
 
 /** (read_page_flash)
  * Reads 256 bytes on a page in the user writable section.
  *
  * # Parameters
- * - 'page' - page number
+ * - 'page' - page number, from 0 to 5887; other values are rejected.
  * - 'data' - pointer to an array to fill with flash page data.
  *
  * # Return 
  * - none
 **/
-void read_page_flash(uint8_t page, char *buf);
+void read_page_flash(uint16_t page, char *buf);
 
 /**
  * ## MAGNETOMETER API 
@@ -1122,9 +1132,23 @@ int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
  * - None
  * 
  * # Return
- * - 1 if successfully detected the magnetometer, else 0
+ * - 0 if successfully detected the magnetometer, else 1
 **/
 uint8_t magn_init(void);
 
+
+/* PFFS file/log APIs are also available through their standalone public headers.
+ * Including declarations adds no flash/RAM cost when applications do not use them. */
+#include "pffs/flash_file.h"
+#include "pffs/flash_log.h"
+
+// *****
+// Changes the magnetometer output data rate (has an effect on the low pass filter bandwidth)
+// Args :
+// odr - output data rate (either 10, 20, 50 or 100 Hz)
+// Returns :
+// - 1 if successfull else 0
+// *****
+uint8_t magn_select_odr(uint8_t odr);
 
 #endif /* __POGOBOT_H__ */

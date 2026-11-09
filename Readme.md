@@ -29,6 +29,93 @@ This SDK allows you to compile and upload code on the robot.
 
 Please visit : https://github.com/nekonaute/pogobot-sdk or https://github.com/nekonaute/pogobot
 
+Library refresh for the 2.7 firmware
+------------------------------------
+
+This SDK includes the library fixes from Pogobot's LTO/general-fixes change.
+IR constructors reject oversized payloads before copying, transmitters wait
+for FIFO space for every byte, and receivers validate lengths before processing
+commands. Full 256-byte SPI security-register writes and signed timer
+conversions are corrected. Receive-drop/malformed counters are available
+through the updated headers.
+
+Applications link their own copy of pogolib. Rebuild and re-upload an
+application with this SDK to include the fixes; updating Pogobios alone does
+not update that application code. The v2.7.1 raw flash-page signature and linker-capacity changes are described
+below. The other existing application API signatures remain unchanged.
+
+The prebuilt archive contains native fallback code as well as LTO information.
+The ordinary example Makefiles work with the tested GCC 10.1.0 toolchain; LTO
+is not a new requirement for application source. Compiler/source provenance
+and the archive checksum are recorded in [SDK_BUILD.md](SDK_BUILD.md).
+Hardware timing and behavior remain to be checked on robots.
+
+Versioned IR upload tools
+-------------------------
+
+Use the existing `make connect TTY=/dev/ttyUSBX` command from an example,
+then `run` and `rc_flash_robot` at the remote. The terminal recognizes the
+updated remote automatically. Keep `tools/litex_term.py` and
+`tools/ir_upload_v2.py` together; no Makefile flag is required.
+
+Matching remote and robot firmware is required. Uploads use numbered 64-byte
+chunks, an exact-image CRC and 16+4 erasure parity. Repeating `rc_flash_robot`
+for the same image can reuse accepted chunks while receivers remain powered.
+Progress reports acknowledgements by the remote, not completion on every
+robot. Q cancels transmission. Direct cable uploads retain their protocol.
+
+`POGOBOT_IR_COPIES=2 make connect TTY=/dev/ttyUSBX` requests another full pass.
+The `firmware_integrity` example checks its installed image and can add an
+adjustable flash-only payload for larger upload tests.
+
+V3 flash and program limits
+--------------------------
+
+`read_page_flash` and `write_page_flash` now take `uint16_t` page IDs.
+Rebuild applications and wrappers against the matched headers and archive.
+Valid pages are 0..5887, each 256 bytes, at physical offsets
+`0x90000..0x1FFFFF`. Public `POGOBOT_USER_FLASH_*` constants expose these bounds.
+The flash example tests pages 0, 255, 256 and 5887 and erases the full region;
+it destroys existing user data.
+
+Generated linker/memory definitions allow 96 KiB programs. Code, data and
+stack must still fit 128 KiB SRAM. This linker limit is separate from the
+128 KiB physical firmware upload slot and the 1,472 KiB user-data region.
+These capacities assume v3 hardware with 2 MiB flash.
+
+PFFS files and saved controllers
+-------------------------------
+
+PFFS v4 file and append-log APIs are included in `libpogobot.a` and exposed
+through `pogobot.h` or `pffs/flash_file.h` and `pffs/flash_log.h`.
+The maintained core is distributed under `src/pffs` for native consumers;
+hardware applications link the archive. See [the core API notes](src/pffs/README.md).
+
+PFFS shares the raw flash region: 64 KiB is reserved for catalogs and
+1,408 KiB for contiguous file extents. Raw page writes/erases can destroy
+files. File operations require serialized access. Library creation retains
+its documented autoformat policy for unformatted/corrupt catalogs; call
+`pogo_flash_file_check()` first when preserving damaged data. Replacement and
+compaction are not power-loss atomic.
+
+The host tool `tools/pffs_transfer.py` uploads/downloads files over UART;
+use `--help` for options. Firmware commands include explicit `format YES`,
+file management, and verified `load <id|name>` installation of a raw
+controller followed by `run`. `load_run <name>` and remote `rc_load_run` select
+and start an exact named controller; failure shows red without starting an
+older image. These commands require the matching BIOS.
+
+`ir_send_file` on robots and `rc_send_file` on remotes broadcast named ordinary
+files using parity and repeated passes. Receivers choose local IDs and verify
+contents before publication. `--replace` preserves an existing ID and requires
+matching format/page allocation; an interrupted replacement can destroy its
+old contents. A pending reception locks file access until completion or local
+`ir_file_abort`. There are no receiver acknowledgements or automatic relays.
+
+Defragmentation remains in the library for maintenance applications such as
+`pogo-utils/examples/flash_file`. It is omitted from the BIOS console. All PFFS
+allocation/mutation must be coordinated with other flash users.
+
 Requirements
 ============
 
